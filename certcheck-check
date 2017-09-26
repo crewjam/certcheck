@@ -7,7 +7,7 @@ hosts=${hosts:-$(git config -f $CERTCHECK_CONF --get-regexp 'cert.*.check' | sed
 
 check_host() {
     host=$1
-    expires=$(openssl s_client -showcerts -tls1_2 -servername $host -connect $host:443 2>/dev/null </dev/null |\
+    expires=$(openssl s_client -showcerts -servername $host -connect $host:443 2>/dev/null </dev/null |\
         openssl x509 -enddate -noout 2>/dev/null | sed "s/.*=\(.*\)/\1/")
     if [ -z "$expires" ] ; then
         echo "$host: connect failed"
