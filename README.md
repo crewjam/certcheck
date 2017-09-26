@@ -10,11 +10,10 @@ I recommend running `certcheck` from cron, like this:
 23 */4 * * * /home/alice/certcheck/certcheck
 ```
 
-You may need to set up your path and environment a bit, in which case a wrapper as `scripts/certcheck.cron-example` might help.
+You may need to set up your path and environment a bit, in which case a wrapper as `examples/certcheck.cron` might help.
 
-See `certcheck.conf.example` for an example of the config file which should be placed in `$HOME/.certcheck.conf`.
+See `examples/certcheck.conf` for an example of the config file which should be placed in `$HOME/.certcheck.conf`.
 
-To check a certificate for expiration, set `check
 
 ```
 [cert "example.com"]
@@ -22,9 +21,9 @@ To check a certificate for expiration, set `check
 	renew-via = route53
 	deploy-via = appengine
 	extra-hosts = www.example.com
-    aws-access-key-id = AKXXXX
-    aws-secret-access-key = XXXX
-    aws-region = us-east-1
+	aws-access-key-id = AKXXXX
+	aws-secret-access-key = XXXX
+	aws-region = us-east-1
 	project = placeholder-site-166500
 	account = alice@example.net
 ```
