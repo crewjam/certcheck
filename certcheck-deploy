@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+CERTCHECK_CONF=${CERTCHECK_CONF-$HOME/.certcheck.conf}
+
+host=$1
+[ ! -z "$host" ]
+
+via=$(git config -f $CERTCHECK_CONF --get cert.$host.deploy-via || true)
+if [ -z "$via" ] ; then
+    echo "warning: no deploy-via defined for $host"
+    exit 0
+fi
+certcheck-deploy-$via $host

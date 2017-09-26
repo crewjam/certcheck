@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+CERTCHECK_CONF=${CERTCHECK_CONF-$HOME/.certcheck.conf}
+
+host=$1
+[ ! -z "$host" ]
+
+project=$(git config -f $CERTCHECK_CONF --get cert.$host.project)
+[ ! -z "$project" ]
+
+account=$(git config -f $CERTCHECK_CONF --get cert.$host.account)
+[ ! -z "$account" ]
+
+lego_path=$(git config -f $CERTCHECK_CONF --get lego.path)
+lego_path=${lego_path:-$HOME/.lego}
+[ ! -z "$lego_path" ]
+
+certificate_id=$(gcloud beta app ssl-certificates list --account $account --project $project | grep $host | awk '{print $1}')
+
+set -x
+gcloud --account $account --project $project beta app ssl-certificates update $certificate_id \
+    --display-name=$host \
+    --certificate=$lego_path/certificates/$host.crt \
+    --private-key=$lego_path/certificates/$host.key

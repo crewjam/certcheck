@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+CERTCHECK_CONF=${CERTCHECK_CONF-$HOME/.certcheck.conf}
+
+renew_hosts=$@
+renew_hosts=${renew_hosts:-$(git config -f $CERTCHECK_CONF --get-regexp 'cert.*.renew-via' | sed -E 's/cert\.(.*)\.renew-via.*/\1/')}
+
+for host in $renew_hosts; do
+    via=$(git config -f $CERTCHECK_CONF --get cert.$host.renew-via)
+    certcheck-renew-$via $host
+done

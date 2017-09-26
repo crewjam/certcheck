@@ -1,0 +1,12 @@
+#!/bin/bash
+
+export PATH=$HOME/go/src/github.com/crewjam/certcheck:$PATH
+export PATH=$HOME/bin:$PATH  # for kubectl
+export PATH=$HOME/go/bin:$PATH  # for lego
+source "$HOME/google-cloud-sdk/path.bash.inc"
+
+command -v kubectl >/dev/null  
+command -v lego >/dev/null
+command -v gcloud >/dev/null
+
+exec $HOME/go/src/github.com/crewjam/certcheck/certcheck

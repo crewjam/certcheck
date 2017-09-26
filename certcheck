@@ -1,0 +1,6 @@
+#!/bin/bash
+
+exit_code=0
+certcheck-check || exit_code=1
+certcheck-renew || exit_code=1
+exit $exit_code

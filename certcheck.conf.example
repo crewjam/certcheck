@@ -1,0 +1,66 @@
+[lego]
+	path = /home/alice/.lego
+	bin = /home/alice/go/bin/lego
+	email = alice@example.com
+
+[cert "router.example.com"]
+	check = true
+	renew-via = route53
+	deploy-via = ubnt
+	aws-access-key-id = AKXXXX
+	aws-secret-access-key = XXXX
+	aws-region = us-east-1
+	ubnt-hostname = ubnt@router.example.com
+
+[cert "example.net"]
+	check = true
+	renew-via = route53
+	deploy-via = appengine
+	project = example-net
+	account = alice@example.net
+
+[cert "example.com"]
+	check = true
+	extra-hosts = www.example.com
+	renew-via = route53
+	deploy-via = appengine
+	aws-access-key-id = AKXXXX
+	aws-secret-access-key = XXXX
+	aws-region = us-east-1
+	project = placeholder-site-166500
+	account = alice@example.net
+
+[cert "app.example.com"]
+	check = true
+	renew-via = route53
+	deploy-via = appengine
+	aws-access-key-id = AKXXXX
+	aws-secret-access-key = XXXX
+	aws-region = us-east-1
+	project=app-example-999
+	account=alice@example.com
+
+[cert "box.example.com"]
+	check = true
+	renew-via = route53
+	deploy-via = synology
+	synology-hostname = root@box.example.com
+
+[cert "api.example.com"]
+	check = true
+	renew-via = route53
+	deploy-via = kubernetes
+	namespace = default
+	secret = production-frontend-https
+	project=api-example-com
+	account=alice@example.com
+	gke-cluster=production
+	gke-zone=us-central1-a
+
+[cert "localhost-do-not-trust.example.net"]
+	check = true
+	renew-via = route53
+	# note: no deploy-via
+	aws-access-key-id = AKXXXX
+	aws-secret-access-key = XXXX
+	aws-region = us-east-1

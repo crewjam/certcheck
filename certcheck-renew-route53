@@ -1,0 +1,51 @@
+#!/bin/bash
+set -e
+
+CERTCHECK_CONF=${CERTCHECK_CONF-$HOME/.certcheck.conf}
+
+host=$1
+[ ! -z "$host" ]
+
+lego_path=$(git config -f $CERTCHECK_CONF --get lego.path || true)
+lego_path=${lego_path-$HOME/.lego}
+[ ! -z "$lego_path" ]
+
+lego_bin=$(git config -f $CERTCHECK_CONF --get lego.bin || true)
+lego_bin=${lego_bin-lego}
+[ ! -z "$lego_bin" ]
+
+lego_email=${lego_email:-$(git config -f $CERTCHECK_CONF --get cert.$host.lego-email || true)}
+lego_email=${lego_email:-$(git config -f $CERTCHECK_CONF --get lego.email || true)}
+[ ! -z "$lego_email" ]
+
+hosts="-d $host"
+for extra_host in $(git config -f $CERTCHECK_CONF --get cert.$host.extra-hosts || true); do
+  hosts="$hosts -d $extra_host"
+done
+
+aws_access_key_id=$(git config -f $CERTCHECK_CONF --get cert.$host.aws-access-key-id || true)
+if [ ! -z $aws_access_key_id ] ; then
+  export AWS_ACCESS_KEY_ID=$aws_access_key_id
+fi
+
+aws_secret_access_key=$(git config -f $CERTCHECK_CONF --get cert.$host.aws-secret-access-key || true)
+if [ ! -z $aws_secret_access_key ] ; then
+  export AWS_SECRET_ACCESS_KEY=$aws_secret_access_key
+fi
+
+aws_region=$(git config -f $CERTCHECK_CONF --get cert.$host.aws-region || true)
+if [ ! -z $aws_region ] ; then
+  export AWS_REGION=$aws_region
+fi
+
+if [ ! -f $lego_path/certificates/$host.key ] ; then
+  (set -x; $lego_bin --path $lego_path -m $lego_email -a --dns route53 $hosts run)
+else
+  old_cert=$(cat $lego_path/certificates/$host.crt)
+  (set -x; $lego_bin --path $lego_path -m $lego_email -a --dns route53 $hosts renew -days 30)
+  if [[ "$old_cert" = "$(cat $lego_path/certificates/$host.crt)" ]] ; then
+    exit 0  # cert was unchanged
+  fi
+fi
+
+certcheck-deploy $host

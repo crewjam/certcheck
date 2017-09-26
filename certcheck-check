@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+CERTCHECK_CONF=${CERTCHECK_CONF-$HOME/.certcheck.conf}
+
+hosts=$@
+hosts=${hosts:-$(git config -f $CERTCHECK_CONF --get-regexp 'cert.*.check' | sed -E 's/cert\.(.*)\.check.*/\1/')}
+
+check_host() {
+    host=$1
+    expires=$(openssl s_client -showcerts -tls1_2 -servername $host -connect $host:443 2>/dev/null </dev/null |\
+        openssl x509 -enddate -noout 2>/dev/null | sed "s/.*=\(.*\)/\1/")
+    if [ -z "$expires" ] ; then
+        echo "$host: connect failed"
+        return 1
+    fi
+
+    now_sec=$(date -d now +%s)
+    expires_sec=$(date -d "${expires}" +%s)
+    days_until_expires=$(( (expires_sec - now_sec) / 86400 ))
+    if [ "$days_until_expires" -lt 30 ]; then
+        echo "$host expires in $days_until_expires days"
+        return 1
+    fi
+}
+
+exit_code=0
+for host in $hosts; do
+    check=$(git config -f $CERTCHECK_CONF --get cert.$host.check)
+    if [ "$check" != "true" ] ; then
+        continue
+    fi
+
+    if ! check_host $host ; then
+        exit_code=1
+    fi
+done
+exit $exit_code

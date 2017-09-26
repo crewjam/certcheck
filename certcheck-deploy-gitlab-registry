@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# WARNING: I don't have gitlab any more, so I haven't tested this in a while. YMMV.
+
+set -e
+CERTCHECK_CONF=${CERTCHECK_CONF-$HOME/.certcheck.conf}
+
+host=$1
+[ ! -z "$host" ]
+
+lego_path=$(git config -f $CERTCHECK_CONF --get lego.path)
+lego_path=${lego_path:-$HOME/.lego}
+[ ! -z "$lego_path" ]
+
+set -x
+ssh $host sudo mkdir -p /etc/gitlab/ssl
+(cat $lego_path/certificates/$host.crt $lego_path/certificates/$host.issuer.crt) |\
+  ssh $host sudo /bin/sh -c '"cat > /etc/gitlab/ssl/$host.crt"'
+cat $lego_path/certificates/$host.key |
+  ssh $host sudo /bin/sh -c '"cat > /etc/gitlab/ssl/$host.key; chmod 0600 /etc/gitlab/ssl/$host.key"'
